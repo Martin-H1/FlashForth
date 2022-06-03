@@ -16,6 +16,9 @@ create gen_next size allot
 variable row
 variable col
 
+\ accumulates the row bits for the leds
+variable rowLeds
+
 \ comparison functions not native to flash forth
 : >=
     2dup
@@ -115,15 +118,22 @@ variable col
 
 : .cell ( -- )
     col @ row @ curr@
-    if [char] * else [char] . then
+    if
+        rowLeds @ 2* 1 + rowLeds !
+        [char] *
+    else
+        rowLeds @ 2* rowLeds !
+        [char] .
+    then
     emit ;
 
 \ prints the row from the current generation to output
 : .currRow ( -- )
-    cr ['] .cell colForEach ;
+    cr blink ['] .cell colForEach rowLeds @ leds ;
 
 \ Prints the current board generation to standard output
 : .curr
+    blink blink
     ['] .currRow rowForEach
     cr ;
 
